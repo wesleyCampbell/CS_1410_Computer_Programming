@@ -2,7 +2,7 @@ import os
 import platform
 
 names_file = "names.names"
-story_file = "Term1/story.story"
+story_file = "story.story"
 
 
 # Pull names from names.names
