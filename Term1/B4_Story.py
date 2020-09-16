@@ -1,11 +1,11 @@
 import os
+import platform
 
-names_file = "Term1/names.names"
+names_file = "names.names"
 story_file = "Term1/story.story"
 
-# The list of names
 
-
+# Pull names from names.names
 def load_names(file):
     file = open(names_file, "r")
     output = []
@@ -102,6 +102,7 @@ def edit():
 # Sort participants alphebetically
 def sort():
     if input("Sort Names Alphebetically? y/n: ") == 'y':
+        global names
         names = sorted(names)
     else:
         print("Action Aborted")
@@ -154,8 +155,10 @@ switch = {
     'Q': quit
 }
 
-names = load_names(names_file)
+
 user_input = ''
+# The names list
+names = load_names(names_file)
 
 while user_input != 'Q':
     user_input = input(menu).upper()
@@ -165,3 +168,4 @@ while user_input != 'Q':
         print("Invalid Option")
     input('Press "Enter" to continue: ')
     os.system('cls')
+    print(platform.system())
