@@ -3,47 +3,51 @@ from random import randint as ri
 import os
 
 
+def print_creatures(creatures):
+    for c in creatures:
+        print(f"{c.name}: {c.type} | {c.health} health")
+    print("--------------------")
+
 elf = Elf("Jose", 0.11)
 dwarf = Dwarf("Samuel", 5, 0.11)
 wizard = Wizard("Gorgoroth", 0.1)
 
 creature_list = [elf, dwarf, wizard]
 
-while elf.alive and dwarf.alive and wizard.alive:
-    for c in creature_list:
-        print(f"{c.name}: {c.health}")
-    print("----------")
+while True:
+    print_creatures(creature_list)
 
     input(' ')
 
     for c in creature_list:
-        print("\n\n\n{c.name}, who do you wish to attack?\n")
-        options = []
-        for option in creature_list.copy().remove(c)
-            print(f"{option.name}: {option.type} | {option.health}")
-            options.append(option.name)
+        os.system('cls' if os.name == 'nt' else 'clear')
         
         while True:
-            input = ""
-
-    for c in creature_list:
-        while True:
-            os.system('cls' if os.name == 'nt' else 'clear')
             print(f"It is {c.name}'s turn:'")
             print("\n")
 
-            options = []
-            for option in creature_list.copy().remove(c):
-                print(f"{option.name}: {option.type} | {option.health}")
-                ptions.append(option)
+            # Print out every other creature
+            c_creature_list = creature_list.copy()
+            c_creature_list.remove(c)
+            print_creatures(c_creature_list)
 
-            to_attack = input("\n Who do you wish to attack: ")
-            if to_attack in [o.name for o in options]:
-                msg = c.attack_creature(option)
-                print(msg)
-                input("\nPress enter to continue...")
+            print("\n")
+
+            choice = input("Who do you wish to attack: ")
+
+            if choice in [i.name for i in c_creature_list]:
+                for option in c_creature_list:
+                    # If user chose this creature attack it
+                    if option.name == choice:
+                        msg = c.attack_creature(option)
+                        print("\n" + msg)
+                        input("\nPress enter to continue...")
+                        break
+                break
+            # If input does not match any creature, try again
             else:
-                print("That is an invalid option. Please review the inputed information.")
-                input("Press enter to try again...")
-                continue
-            break
+                print("That is an invalid choice. Please review the name.")
+                input("\nPress enter to try again...")
+            continue
+
+

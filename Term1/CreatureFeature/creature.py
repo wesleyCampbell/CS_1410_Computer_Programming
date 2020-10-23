@@ -22,10 +22,12 @@ class Creature:
         dmg_dealt, attack_report = creature.defend(self.attack, self.crit_chance_chance())
         # If the attack was successful
         if attack_report == "success":
-            msg = f"While attacking{creature.name}, {self.name} dealt {dmg_dealt} damage"
+            msg = f"While attacking {creature.name}, {self.name} dealt {dmg_dealt} damage"
         # If the failed attack was because of an evasion
         elif attack_report == "evaded":
             msg = f"When {self.name} attempted to attack {creature.name}, {creature.name} evaded the attack!"
+        return msg
+
 
     def crit_chance_chance(self):
         """
@@ -87,7 +89,7 @@ class Elf(Creature):
         :return (Int, Str): (dmg dealt, attack report)
         """
         dmg_dealt = 0
-        if random.random() > evade_chance:
+        if random.random() > self.evade_chance:
             # Subtract attack damage from defense
             self.defense -= self.attack * crit
             # If damage was greater than current defense
@@ -126,8 +128,8 @@ class Dwarf(Creature):
         msg = ""
         # If dwarf doesn't miss attack
         if random.random() > self.miss_chance:
-            dmg_dealt, attack_report = creature.defend(self.attack, self.crit_chance_chance)
-            self.attempt_dmg_inc(self)
+            dmg_dealt, attack_report = creature.defend(self.attack, self.crit_chance)
+            self.attempt_dmg_inc()
             if attack_report == "success":
                 msg = f"While attacking {creature.name}, {self.name} dealt {dmg_dealt} damage!"
             elif attack_report == "evaded":
