@@ -15,15 +15,17 @@ wizard = Wizard("Gorgoroth", 0.1)
 creature_list = [elf, dwarf, wizard]
 
 while True:
+    os.system('cls' if os.name == 'nt' else 'clear')
     print_creatures(creature_list)
-
+    
     input(' ')
 
     for c in creature_list:
         os.system('cls' if os.name == 'nt' else 'clear')
         
         while True:
-            print(f"It is {c.name}'s turn:'")
+            print(f"It is {c.name}'s turn:")
+            print(f"You have {c.health} health")
             print("\n")
 
             # Print out every other creature
@@ -39,15 +41,21 @@ while True:
                 for option in c_creature_list:
                     # If user chose this creature attack it
                     if option.name == choice:
-                        msg = c.attack_creature(option)
+                        msg, is_alive = c.attack_creature(option)
                         print("\n" + msg)
-                        input("\nPress enter to continue...")
+                        if not is_alive:
+                            creature_list.remove(option)
+                        input("\nPress enter to continue...\n")
                         break
                 break
             # If input does not match any creature, try again
             else:
                 print("That is an invalid choice. Please review the name.")
                 input("\nPress enter to try again...")
+                os.system('cls' if os.name == 'nt' else 'clear')
             continue
-
-
+        if len(creature_list) == 1:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"{creature_list[0].name} won!!!")
+            input("Press enter to end the game")
+            break

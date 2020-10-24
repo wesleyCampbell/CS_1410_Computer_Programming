@@ -17,7 +17,7 @@ class Creature:
         """
         Attack a creature 
         :param creature: Creature
-        :return Str: attack msg
+        :return (Str, Bool): (attack msg, is alive?)
         """
         dmg_dealt, attack_report = creature.defend(self.attack, self.crit_chance_chance())
         # If the attack was successful
@@ -26,7 +26,9 @@ class Creature:
         # If the failed attack was because of an evasion
         elif attack_report == "evaded":
             msg = f"When {self.name} attempted to attack {creature.name}, {creature.name} evaded the attack!"
-        return msg
+        elif attack_report == "perished":
+            msg = f"{creature.name} perished under {self.name}'s attack!'"
+        return msg, creature.alive
 
 
     def crit_chance_chance(self):
@@ -52,9 +54,11 @@ class Creature:
             self.health += self.defense
             dmg_dealt = abs(self.defense)
         # If dead, die
+        attack_report = "success"
         if self.health <= 0:
             self.perish()
-        return dmg_dealt, "success"
+            attack_report = "perished"
+        return dmg_dealt, attack_report
 
     def reset_defense(self):
         """
@@ -100,6 +104,7 @@ class Elf(Creature):
             # If dead, die
             if self.health <= 0:
                 self.perish()
+                return dmg_dealt, "perished"
             return dmg_dealt, "success"
         return dmg_dealt, "evaded"
 
@@ -123,7 +128,7 @@ class Dwarf(Creature):
         """
         Attack a creature
         :param creature: Creature
-        :return Str: message
+        :return (Str, Bool): (message, is alive?)
         """
         msg = ""
         # If dwarf doesn't miss attack
@@ -134,10 +139,12 @@ class Dwarf(Creature):
                 msg = f"While attacking {creature.name}, {self.name} dealt {dmg_dealt} damage!"
             elif attack_report == "evaded":
                 msg = f"When {self.name} attempted to attack {creature.name}, {creature.name} evaded the attack!"
+            elif attack_report == "perished":
+                msg = f"{creature.name} perished under {self.name}'s attack!'"
         # If dwarf misses attack
         else:
             msg = f"When {self.name} attempted to attack {creature.name}, {self.name} missed!"
-        return msg
+        return msg, creature.alive
 
     def attempt_dmg_inc(self):
         """
@@ -145,7 +152,7 @@ class Dwarf(Creature):
         :return None
         """
         if random.random() < self.dmg_inc_chance:
-            self.damage += self.dmg_inc
+            self.attack += self.dmg_inc
             self.miss_chance += 0.05
 
 
@@ -157,24 +164,28 @@ class Wizard(Creature):
         crit_mult = 1
         health = 100
         super().__init__(type_, name, attack, defense, crit_mult, health)
-        self.health_steal = 1.75
+        self.health_steal = 100
         self.health_steal_inc_chance = health_steal_inc_chance
     
-    def attack(self, creature):
+    def attack_creature(self, creature):
         """
         Attacks a creature; the wizards health incerases by self.health_steal percent of the damage dealth, then attempts to increase health steal
         :param creature: Creature
         :return Str: message
         """
-        dmg_dealt, attack_report = creature.defend(self.damage, crit_mult)
+        dmg_dealt, attack_report = creature.defend(self.attack, self.crit_mult)
         msg = ""
+
         if attack_report == "success":
-            msg = f"While attacking {creature.name}, {self.name} dealt {dmg_dealt}!"
+            msg = f"While attacking {creature.name}, {self.name} dealt {dmg_dealt}, stealing {dmg_dealt * self.health_steal} health!"
             self.health += dmg_dealt * self.health_steal
             self.attempt_inc_health_steal()
         elif attack_report == "evaded":
             msg = f"When {self.name} attempted to attack {creature.name}, {creature.name} evaded the attack!"
-        return msg
+        elif attack_report == "perished":
+            msg = f"{creature.name} perished under {self.name}'s attack!'"
+
+        return msg, creature.alive
     
     def attempt_inc_health_steal(self):
         """
