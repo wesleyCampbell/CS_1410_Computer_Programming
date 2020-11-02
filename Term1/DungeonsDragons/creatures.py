@@ -86,7 +86,7 @@ class Creature:
         }
     
     def __str__(self):
-        return f"{self.name}: {self.type}"
+        return f"{self.name}: {self.type} | {self.health}"
 
 class Elf(Creature):
     def __init__(self, name, evade_chance, attack=30, defense=15, health=80):
@@ -168,7 +168,7 @@ class Dwarf(Creature):
             self.miss_chance += 0.05
 
     def __repr__(self):
-        output = self.__repr__()
+        output = super().__repr__()
         output["dmg_inc"] = self.dmg_inc
         output["miss_chance"] = self.miss_chance
         return output
@@ -210,5 +210,5 @@ class Wizard(Creature):
             self.health_steal += 0.05
 
     def __repr__(self):
-        output = self.__repr__()
+        output = super().__repr__()
         output["health_steal_inc_chance"] = self.health_steal_inc_chance

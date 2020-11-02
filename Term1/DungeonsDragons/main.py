@@ -14,6 +14,7 @@ class Program:
             'dwarf',
             'wizard'
         ]
+        self.setup_success = False
 
     def saveCreatures(self):
         """
@@ -146,11 +147,12 @@ class Program:
                 # Make sure that user selects a new name,
                 # Primarily for file issues
                 while name not in name_list:
-                    name = input(f"Enter {creature_input}'s name: '")
                     if name in name_list:
                         print("That name is already taken")
                         input("Press enter to try again...")
                         continue
+                    name = input(f"Enter {creature_input}'s name: '")
+                    break
 
                 # If user selected an Elf
                 if creature_input == "elf":
@@ -194,36 +196,49 @@ class Program:
         :return None
         """
         clearTerminal()
-        # Print out all creatures and their corresponding index value
-        self.printCreatures()
-        print('\n')
+        
+        # If there are creatures to remove
+        if len(self.creatures):
+            # Print out all creatures and their corresponding index value
+            self.printCreatures()
+            print('\n')
+            
+            user_input = self.verifyInput(int, len(self.creatures)-1, "Which creature do you want to remove? Index #: ", clear_terminal=False)
+            selected_creature = self.creatures[user_input]
 
-        user_input = self.verifyInput(int, len(self.creatures)-1, "Which creature do you want to remove? Index #: ", clear_terminal=False)
-        selected_creature = self.creatures[user_input]
+            # Confirm that user wants to delete creature
+            if input(f"Delete {selected_creature.name}? y/n: ").lower() == 'y':
+                # Delete creature from self.creatures
+                self.creatures.remove(selected_creature)
 
-        # Confirm that user wants to delete creature
-        if input(f"Delete {selected_creature.name}? y/n: ").lower() == 'y':
-            # Delete creature from self.creatures
-            self.creatures.remove(selected_creature)
+                # If creature has save file, delete it
+                try:
+                    os.remove(os.path.join(data_file_path, selected_creature.name + ".json"))
+                except FileNotFoundError:
+                    pass
 
-            # If creature has save file, delete it
-            try:
-                os.remove(os.path.join(data_file_path, selected_creature.name + ".json"))
-            except FileNotFoundError:
-                pass
-
-            print(f"Deleted {selected_creature.name}.")
-        else:
-            print("Deletion aborted.")
-        input("Press enter to continue...")
+                print(f"Deleted {selected_creature.name}.")
+            else:
+                print("Deletion aborted.")
+            input("Press enter to continue...")
 
     def selectLoadCreature(self):
         clearTerminal()
         
         # Collect all data files in data folder
         files = [f for f in os.listdir(data_file_path) if os.path.isfile(os.path.join(data_file_path, f))]
+        
+        for i, f in enumerate(files):
+            print(f"{i}: {f}")
 
+        # Verify that user selects a valid creature to load
+        selected_index = self.verifyInput(int, len(files) - 1, "Which creature do you wish to load? Index #: ", clear_terminal=False)
 
+        # Add creature to self.creatures
+        c = self.loadCreature(files[selected_index])
+        self.creatures.append(c)
+        print(f"Added {c.type} {c.name}!")
+        input("Press enter to continue...")
 
     def setupCreatures(self):
         """
@@ -236,6 +251,8 @@ class Program:
             "2": self.selectLoadCreature,
             "3": self.removeCreature,
             "4": self.printCreatures,
+            "5": self.saveCreatures,
+            "6": lambda: '',
             "q": lambda: "",
         }
         msg = """
@@ -243,16 +260,22 @@ class Program:
             2: Load a saved creature
             3: Remove a creature
             4: List current creatures
+            5: Save current creatures
+            6: Play game
             "q": Quit
         """
 
         user_input = ''
-        while user_input != "q":
+        while user_input != "q" or user_input != "6":
             os.system("clear")
             print("Select an option:")
             print(msg)
 
             user_input = input()
+
+            # If we're going to play game
+            if user_input == "6":
+                self.setup_success = True
 
             try:
                 switch[user_input]()
@@ -263,7 +286,46 @@ class Program:
                 input("Press enter to continue...")
                 continue
 
+    def playGame(self):
+        """
+        This function is the main game loop
+        :return None
+        """
+        for c in self.creatures:
+            print(str(c))
+        print('')
+
+        for c in self.creatures:
+            print(f"It is {c.name}'s turn!'")
+            print('')
+
+            opponents = copy(self.creatures)
+            opponents.remove(c)
+
+            for opponent in opponents:
+                print(str(c))
+            
+            to_attack = ''
+            name_list = [o.name for o in opponents]
+            while to_attack not in name_list:
+                to_attack = input("Who do you wish to attack? ")
+
+                # If the user inputed an invalid name
+                if to_attack not in opponents:
+                    print("That is an invalid option. Please review inputed name")
+                    input("Press enter to try again...")
+                
+                selected_creature = opponents[name_list.index(to_attack)]
+
+            c.attack_creature(selected_creature)
+            if selected_creature.health < 0:
+                self.removeCreature(selected_creature)
 
 if __name__ == "__main__":
     program = Program()
     program.setupCreatures()
+    # If setup was a success and there are creatures, play game
+    if program.setup_success and len(program.creatures):
+        program.playGame()
+    else:
+        print("Unable to play game. Try reloading game or adding creatures")
