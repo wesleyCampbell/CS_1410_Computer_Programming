@@ -266,7 +266,7 @@ class Program:
         """
 
         user_input = ''
-        while user_input != "q" or user_input != "6":
+        while user_input != "q" and user_input != "6":
             os.system("clear")
             print("Select an option:")
             print(msg)
@@ -299,7 +299,7 @@ class Program:
             print(f"It is {c.name}'s turn!'")
             print('')
 
-            opponents = copy(self.creatures)
+            opponents = self.creatures.copy()
             opponents.remove(c)
 
             for opponent in opponents:
@@ -314,6 +314,7 @@ class Program:
                 if to_attack not in opponents:
                     print("That is an invalid option. Please review inputed name")
                     input("Press enter to try again...")
+                    continue
                 
                 selected_creature = opponents[name_list.index(to_attack)]
 
