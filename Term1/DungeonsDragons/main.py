@@ -48,7 +48,7 @@ class Program:
 
             return Elf(name, evade_chance, attack, defense, health)
 
-        elif data.type == "dwarf":
+        elif data["type"] == "dwarf":
             """
             params:
             name | dmg_inc | miss_chance | attack | defense | health
@@ -62,7 +62,7 @@ class Program:
 
             return Dwarf(name, dmg_inc, miss_chance, attack, defense, health)
 
-        elif data.type == "wizard":
+        elif data["type"] == "wizard":
             """
             params:
             name | health_steal_inc_chance | attack | defense | health | health_steal
@@ -291,42 +291,50 @@ class Program:
         This function is the main game loop
         :return None
         """
-        for c in self.creatures:
-            print(str(c))
-        print('')
+        while len(self.creatures) > 1:
+            # Give each creature a turn
+            for c in self.creatures:
+                # Make a list of all other creatures
+                opponents = self.creatures.copy()
+                opponents.remove(c)
 
-        for c in self.creatures:
-            print(f"It is {c.name}'s turn!'")
-            print('')
+                # User selects who to attack
+                choice = ''
+                name_list = [i.name for i in opponents]
+                while choice not in name_list:
+                    clearTerminal()
 
-            opponents = self.creatures.copy()
-            opponents.remove(c)
+                    # Print out opponents
+                    print(f"It is {c.name}'s turn!\n")
+                    print('')
+                    for x in opponents:
+                        print(x)
 
-            for opponent in opponents:
-                print(str(c))
-            
-            to_attack = ''
-            name_list = [o.name for o in opponents]
-            while to_attack not in name_list:
-                to_attack = input("Who do you wish to attack? ")
-
-                # If the user inputed an invalid name
-                if to_attack not in opponents:
-                    print("That is an invalid option. Please review inputed name")
-                    input("Press enter to try again...")
-                    continue
-                
-                selected_creature = opponents[name_list.index(to_attack)]
-
-            c.attack_creature(selected_creature)
-            if selected_creature.health < 0:
-                self.removeCreature(selected_creature)
+                    choice = input("\nWho do you wish to attack: ")
+                    # If choice is valid
+                    try:
+                        selected_creature = opponents[name_list.index(choice)]
+                        break
+                    except:
+                        print("That was an invalid option. Please review inputed name")
+                        input("Press enter to try again...")
+                        continue
+                msg = c.attack_creature(selected_creature)
+                print(msg[0])
+                # If the creature perished under the attack
+                if not selected_creature.alive:
+                    self.creatures.remove(selected_creature)
+                input("Press enter to continue...")
+        
+        # End the game
+        print(f"{self.creatures[0]} won the game!")
+        input("Press enter to end game...")
 
 if __name__ == "__main__":
     program = Program()
     program.setupCreatures()
-    # If setup was a success and there are creatures, play game
-    if program.setup_success and len(program.creatures):
+    # If setup was a success and there are 2 or more creatures, play game
+    if program.setup_success and len(program.creatures) > 1:
         program.playGame()
     else:
         print("Unable to play game. Try reloading game or adding creatures")

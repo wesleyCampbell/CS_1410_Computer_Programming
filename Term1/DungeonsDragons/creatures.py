@@ -179,6 +179,7 @@ class Wizard(Creature):
         type_ = "wizard"
         crit_mult = 1
         super().__init__(type_, name, attack, defense, crit_mult, health)
+        self.health_steal = health_steal
         self.health_steal_inc_chance = health_steal_inc_chance
     
     def attack_creature(self, creature):
