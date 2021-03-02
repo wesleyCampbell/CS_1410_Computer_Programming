@@ -1,6 +1,7 @@
 alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'
-ceaser_offset = 8
+ceaser_offset = 3
 ceaser_key = alphabet[ceaser_offset:] + alphabet[:ceaser_offset]
+print(ceaser_key)
 
 # Map msg with key
 encrypt = lambda msg, key: ''.join(map(lambda c: key[alphabet.index(c)] if c in alphabet else c, msg.lower()))
